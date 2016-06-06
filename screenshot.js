@@ -2,7 +2,7 @@
 
 var fs = require('fs');
 var SCREENSHOT_WIDTH = 1280;
-var SCREENSHOT_HEIGHT = 500;
+var SCREENSHOT_HEIGHT = 900;
 var LOAD_WAIT_TIME = 5000;
 var listDrupalPages = fs.read('drupal7.sites.txt').split(/\r?\n/);
 var imageFolder = "/public/images"
@@ -37,7 +37,7 @@ var renderPage = function(page){
 
     page.clipRect = {
         top:0,left:0,width: SCREENSHOT_WIDTH,
-        height: pageHeight
+        height: SCREENSHOT_HEIGHT
     };
     page.render("public/images/" + page.title +".png");
     console.log("rendered:", url+".png")
