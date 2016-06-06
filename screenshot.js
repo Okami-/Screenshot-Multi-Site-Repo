@@ -1,60 +1,80 @@
 // Run with phantomjs screenshot.js
 
 var fs = require('fs');
-var PAGE_WIDTH = 960;
-var PAGE_HEIGHT = 640;
+var SCREENSHOT_WIDTH = 1280;
+var SCREENSHOT_HEIGHT = 500;
+var LOAD_WAIT_TIME = 5000;
 var listDrupalPages = fs.read('drupal7.sites.txt').split(/\r?\n/);
 var imageFolder = "/public/images"
-
 for (var i=0;i<listDrupalPages.length;i++) {
   listDrupalPages[i]="http://"+listDrupalPages[i];
 }
-
 var URLS = listDrupalPages;
-console.log(URLS);
-// phantomjs page object and helper flag
-var page = require('webpage').create(),
-  loadInProgress = false,
-  pageIndex = 0;
 
-// set clip and viewport based on PAGE_WIDTH and PAGE_HEIGHT constants
-if (PAGE_WIDTH > 0 && PAGE_HEIGHT > 0) {
-  page.viewportSize = {
-    width: PAGE_WIDTH,
-    height: PAGE_HEIGHT
-  };
 
-  page.clipRect = {
-    top: 0,
-    left: 0,
-    width: PAGE_WIDTH,
-    height: PAGE_HEIGHT
-  };
+var getPageURL = function(page){
+    var getPageURL = page.url;
+    console.log("getting url:", getPageURL)
+    return getPageURL;
 }
 
-// page handlers
-page.onLoadStarted = function() {
-  loadInProgress = true;
-  console.log('page ' + (pageIndex + 1) + ' load started');
-};
+var encodeURL = function(page) {
+  var encodedURL =  encodeURIComponent(url);
+}
 
-page.onLoadFinished = function() {
-  loadInProgress = false;
-  page.render("public/images/" + (pageIndex + 1) + "_" + PAGE_WIDTH + "x" + PAGE_HEIGHT + ".png");
-  console.log('page ' + (pageIndex + 1) + ' load finished');
-  pageIndex++;
-};
+var getPageHeight = function(page){
+    var documentHeight = page.evaluate(function() {
+        return document.body.offsetHeight;
+    })
+    console.log("getting height:", documentHeight)
+    return documentHeight;
+}
 
-// try to load or process a new page every 250ms
-setInterval(function() {
-  if (!loadInProgress && pageIndex < URLS.length) {
-    console.log("image " + (pageIndex + 1));
-    page.open(URLS[pageIndex]);
-  }
-  if (pageIndex == URLS.length) {
-    console.log("image render complete!");
-    phantom.exit();
-  }
-}, 250);
+var renderPage = function(page){
 
-console.log('Number of URLS: ' + URLS.length);
+    var url =  getPageURL(page);
+    var pageHeight = getPageHeight(page);
+
+    page.clipRect = {
+        top:0,left:0,width: SCREENSHOT_WIDTH,
+        height: pageHeight
+    };
+    page.render("public/images/" + page.title +".png");
+    console.log("rendered:", url+".png")
+}
+
+var exitIfLast = function(index,array){
+    console.log(array.length - index-1, "more screenshots to go!")
+    console.log("~~~~~~~~~~~~~~")
+    if (index == array.length-1){
+        console.log("exiting phantomjs")
+        phantom.exit();
+    }
+}
+
+var takeScreenshot = function(element){
+
+    console.log("opening URL:", element)
+
+    var page = require("webpage").create();
+
+    page.viewportSize = {width:SCREENSHOT_WIDTH, height:SCREENSHOT_HEIGHT};
+
+    page.open(element);
+
+    console.log("waiting for page to load...")
+
+    page.onLoadFinished = function() {
+        setTimeout(function(){
+            console.log("that's long enough")
+            renderPage(page)
+            exitIfLast(index,URLS)
+            index++;
+            takeScreenshot(URLS[index]);
+        },LOAD_WAIT_TIME)
+    }
+}
+
+var index = 0;
+
+takeScreenshot(URLS[index]);
