@@ -6,7 +6,7 @@ First install dependencies
 
 Place  drupal7.sites.txt file in home directory
 
-Then start phantomjs to take screenshots of return delimted urls
+Then start phantomjs to take screenshots of return delimited urls
 
 `phantomjs screenshot.js`
 
