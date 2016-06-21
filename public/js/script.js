@@ -7,7 +7,7 @@ $.ajax({
         //List all .png file names in the page
         $(data).find("a:contains(" + fileextension + ")").each(function () {
             var filename = this.href.replace(window.location.host, "").replace("http://", "");
-            $("body").append("<h2>" + filename + "</h2>" + "<img width= '380px'" + "src=" + filename + ">");
+            $("body").append("<h2>" + filename + "</h2>" + "<img width= '400px'" + "src=" + filename + ">");
         });
     }
 });
